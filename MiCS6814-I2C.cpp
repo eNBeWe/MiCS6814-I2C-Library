@@ -50,7 +50,7 @@ uint8_t MiCS6814::begin() {
  * @return {@code 1} if the connection could be
  *         established, {@code 0} otherwise
  */
-uint8_t MiCS6814::begin(uint8_t address {
+uint8_t MiCS6814::begin(uint8_t address) {
   // Store the address for later use
   __i2CAddress = address;
 
@@ -64,7 +64,7 @@ uint8_t MiCS6814::begin(uint8_t address {
     return 0;
   }
 
-  uint16_t versionData = getEEPROMData(EEPROM_VERSION_ID)
+  uint16_t versionData = getEEPROMData(EEPROM_VERSION_ID);
   // Version 2 is identified by the unique data
   if (DATA_VERSION_ID_V2 == versionData) {
     __version = 2;
@@ -220,35 +220,29 @@ void MiCS6814::ledOff(){
  *         of the selected channel.
  */
 uint16_t MiCS6814::getResistance(channel_t channel) {
-  uint16_t resistance;
-
   // The versions use the same command but different response formats.
   if (1 == __version) {
     switch (channel) {
       case CH_NH3:
-        resistance = getRuntimeData(CMD_GET_NH3, 4, 1);
-        break;
+        return getRuntimeData(CMD_GET_NH3, 4, 1);
       case CH_RED:
-        resistance = getRuntimeData(CMD_GET_RED, 4, 1);
-        break;
+        return getRuntimeData(CMD_GET_RED, 4, 1);
       case CH_OX:
-        resistance = getRuntimeData(CMD_GET_OX, 4, 1);
-        break;
+        return getRuntimeData(CMD_GET_OX, 4, 1);
     }
   }
   if (2 == __version) {
     switch (channel) {
       case CH_NH3:
-        resistance = getRuntimeData(CMD_GET_NH3, 2, 0);
-        break;
+        return getRuntimeData(CMD_GET_NH3, 2, 0);
       case CH_RED:
-        resistance = getRuntimeData(CMD_GET_RED, 2, 0);
-        break;
+        return getRuntimeData(CMD_GET_RED, 2, 0);
       case CH_OX:
-        resistance = getRuntimeData(CMD_GET_OX, 2, 0);
-        break;
+        return getRuntimeData(CMD_GET_OX, 2, 0);
     }
   }
+  
+  return 0;
 }
 
 /**
@@ -262,37 +256,31 @@ uint16_t MiCS6814::getResistance(channel_t channel) {
  *         of the selected channel.
  */
 uint16_t MiCS6814::getBaseResistance(channel_t channel) {
-  uint16_t baseResistance;
-
   if (1 == __version) {
     // Version 1 can query every channel independently
     // Reply is 4 bytes long with relevant data in second and third byte
     switch (channel) {
       case CH_NH3:
-        baseResistance = getRuntimeData(CMD_V1_GET_R0_NH3, 4, 1);
-        break;
+        return getRuntimeData(CMD_V1_GET_R0_NH3, 4, 1);
       case CH_RED:
-        baseResistance = getRuntimeData(CMD_V1_GET_R0_RED, 4, 1);
-        break;
+        return getRuntimeData(CMD_V1_GET_R0_RED, 4, 1);
       case CH_OX:
-        baseResistance = getRuntimeData(CMD_V1_GET_R0_OX, 4, 1);
-        break;
+        return getRuntimeData(CMD_V1_GET_R0_OX, 4, 1);
     }
   }
   if (2 == __version) {
     // Version 2 uses the same command every time, but different offsets
     switch (channel) {
       case CH_NH3:
-        baseResistance = getRuntimeData(CMD_V2_GET_R0, 6, 0);
-        break;
+        return getRuntimeData(CMD_V2_GET_R0, 6, 0);
       case CH_RED:
-        baseResistance = getRuntimeData(CMD_V2_GET_R0, 6, 2);
-        break;
+        return getRuntimeData(CMD_V2_GET_R0, 6, 2);
       case CH_OX:
-        baseResistance = getRuntimeData(CMD_V2_GET_R0, 6, 4);
-        break;
+        return getRuntimeData(CMD_V2_GET_R0, 6, 4);
     }
   }
+
+  return 0;
 }
 
 
@@ -311,8 +299,10 @@ float MiCS6814::getCurrentRatio(channel_t channel) {
     return resistance / baseResistance;
   }
   if (2 == __version) {
-    return ratio0 = resistance / baseResistance * (1023.0 - baseResistance) / (1023.0 - resistance);
+    return resistance / baseResistance * (1023.0 - baseResistance) / (1023.0 - resistance);
   }
+
+  return -1.0;
 }
 
 
@@ -331,35 +321,35 @@ float MiCS6814::measure(gas_t gas) {
   switch (gas) {
     case CO:
       ratio = getCurrentRatio(CH_RED);
-      c = pow(ratio1, -1.179) * 4.385;
+      c = pow(ratio, -1.179) * 4.385;
       break;
     case NO2:
       ratio = getCurrentRatio(CH_OX);
-      c = pow(ratio2, 1.007) / 6.855;
+      c = pow(ratio, 1.007) / 6.855;
       break;
     case NH3:
       ratio = getCurrentRatio(CH_NH3);
-      c = pow(ratio0, -1.67) / 1.47;
+      c = pow(ratio, -1.67) / 1.47;
       break;
     case C3H8:
       ratio = getCurrentRatio(CH_NH3);
-      c = pow(ratio0, -2.518) * 570.164;
+      c = pow(ratio, -2.518) * 570.164;
       break;
     case C4H10:
       ratio = getCurrentRatio(CH_NH3);
-      c = pow(ratio0, -2.138) * 398.107;
+      c = pow(ratio, -2.138) * 398.107;
       break;
     case CH4:
       ratio = getCurrentRatio(CH_RED);
-      c = pow(ratio1, -4.363) * 630.957;
+      c = pow(ratio, -4.363) * 630.957;
       break;
     case H2:
       ratio = getCurrentRatio(CH_RED);
-      c = pow(ratio1, -1.8) * 0.73;
+      c = pow(ratio, -1.8) * 0.73;
       break;
     case C2H5OH:
       ratio = getCurrentRatio(CH_RED);
-      c = pow(ratio1, -1.552) * 1.622;
+      c = pow(ratio, -1.552) * 1.622;
       break;
   }
 
@@ -413,7 +403,7 @@ uint16_t MiCS6814::getEEPROMData(uint8_t eeprom_address) {
   delayMicroseconds(50);
 
   // Request two bytes of data from the slave.
-  uint8_t received = Wire.requestFrom(__i2CAddress, 2);
+  uint8_t received = Wire.requestFrom(__i2CAddress,(uint8_t) 2);
 
   // Make sure we received the right amount of data
   if (2 == received) {

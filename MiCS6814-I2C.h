@@ -89,7 +89,7 @@
 // Enum for the sensor channels
 enum channel {
   CH_NH3, CH_RED, CH_OX
-}
+};
 typedef enum channel channel_t;
 
 // Enum for proper gas declaration
@@ -174,10 +174,9 @@ private:
   uint8_t __i2CAddress;
 
   uint16_t getEEPROMData(uint8_t eeprom_address);
-  uint16_t getRuntimeDataV1(uint8_t cmd);
-  uint16_t getRuntimeDataV2(uint8_t cmd, uint8_t responseLength);
+  uint16_t getRuntimeData(uint8_t cmd, uint8_t responseLength, uint8_t responseOffset);
   float getCurrentRatio(channel_t channel);
-}
+};
 
 
 #endif

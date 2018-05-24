@@ -141,28 +141,28 @@ public:
 
   //High level gas concentration, unit: ppm
   float measure(gas_t gas);
-  float measure_CO() {
+  float measureCO() {
     return measure(CO);
   }
-  float measure_NO2() {
+  float measureNO2() {
     return measure(NO2);
   }
-  float measure_NH3() {
+  float measureNH3() {
     return measure(NH3);
   }
-  float measure_C3H8() {
+  float measureC3H8() {
     return measure(C3H8);
   }
-  float measure_C4H10() {
+  float measureC4H10() {
     return measure(C4H10);
   }
-  float measure_CH4() {
+  float measureCH4() {
     return measure(CH4);
   }
-  float measure_H2() {
+  float measureH2() {
     return measure(H2);
   }
-  float measure_C2H5OH() {
+  float measureC2H5OH() {
     return measure(C2H5OH);
   }
 

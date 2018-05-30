@@ -130,7 +130,88 @@ void MiCS6814::calibrate() {
     return;
   }
   if (2 == __version) {
-    // TODO: Implement
+    // Continuously measure the resistance,
+    // storing the last N measurements in a circular buffer.
+    // Calculate the floating average of the last seconds.
+    // If the current measurement is close to the average stop.
+
+    // Seconds to keep stable for successful calibration
+    // (Keeps smaller than 64 to prevent overflows)
+    uint8_t seconds = 30;
+    // Allowed delta for the average from the current value
+    uint8_t delta = 2;
+
+    // Circular buffer for the measurements
+    uint16_t bufferNH3[seconds];
+    uint16_t bufferRED[seconds];
+    uint16_t bufferOX[seconds];
+    // Pointers for the next element in the buffer
+    uint8_t pntrNH3 = 0;
+    uint8_t pntrRED = 0;
+    uint8_t pntrOX = 0;
+    // Current floating sum in the buffer
+    uint16_t fltSumNH3 = 0;
+    uint16_t fltSumRED = 0;
+    uint16_t fltSumOX = 0;
+
+    // Current measurements;
+    uint16_t curNH3;
+    uint16_t curRED;
+    uint16_t curOX;
+
+    // Flag to see if the channels are stable
+    bool NH3stable = false;
+    bool REDstable = false;
+    bool OXstable = false;
+
+    // Initialize buffer
+    for (int i = 0; i < seconds; ++i) {
+      bufferNH3[i] = 0;
+      bufferRED[i] = 0;
+      bufferOX[i] = 0;
+    }
+
+    do {
+      // Wait a second
+      delay(1000);
+
+      // Read new resistances
+      curNH3 = getResistanceNH3();
+      curRED = getResistanceRED();
+      curOX = getResistanceOX();
+
+      // Update floating sum by subtracting value
+      // about to be overwritten and adding the new value.
+      fltSumNH3 = fltSumNH3 + curNH3 - bufferNH3[pntrNH3];
+      fltSumRED = fltSumRED + curRED - bufferRED[pntrRED];
+      fltSumOX = fltSumOX + curOX - bufferOX[pntrOX];
+
+      // Store new measurement in buffer
+      bufferNH3[pntrNH3] = curNH3;
+      bufferRED[pntrRED] = curRED;
+      bufferOX[pntrOX] = curOX;
+
+      // Determine new state of flags
+      NH3stable = abs(fltSumNH3 / seconds - curNH3) < delta;
+      REDstable = abs(fltSumRED / seconds - curRED) < delta;
+      OXstable = abs(fltSumOX / seconds - curOX) < delta;
+
+      // Advance buffer pointer
+      pntrNH3 = (pntrNH3 + 1) % seconds ;
+      pntrRED = (pntrRED + 1) % seconds;
+      pntrOX = (pntrOX + 1) % seconds;
+    } while (!NH3stable || !REDstable || !OXstable);
+
+    // Store new base resistance values in EEPROM
+    Wire.beginTransmission(__i2CAddress);
+    Wire.write(CMD_V2_SET_R0);
+    Wire.write((fltSumNH3 / seconds) >> 8);
+    Wire.write((fltSumNH3 / seconds) & 0xFF);
+    Wire.write((fltSumRED / seconds) >> 8);
+    Wire.write((fltSumRED / seconds) & 0xFF);
+    Wire.write((fltSumOX / seconds) >> 8);
+    Wire.write((fltSumOX / seconds) & 0xFF);
+    Wire.endTransmission();
   }
 }
 

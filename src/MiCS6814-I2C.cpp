@@ -400,37 +400,37 @@ float MiCS6814::measure(gas_t gas) {
   float c = 0;
 
   switch (gas) {
-    case CO:
+    case CO: //carbon monoxide
       ratio = getCurrentRatio(CH_RED);
-      c = pow(ratio, -1.179) * 4.385;
+      c = pow(ratio, -1.177) * 4.4638; //paulvha
       break;
-    case NO2:
+    case NO2: //nitrogen dioxide
       ratio = getCurrentRatio(CH_OX);
-      c = pow(ratio, 1.007) / 6.855;
+      c = pow(ratio, 0.9979) * 0.1516; //paulvha
       break;
-    case NH3:
+    case NH3: //ammonia
       ratio = getCurrentRatio(CH_NH3);
-      c = pow(ratio, -1.67) / 1.47;
+      c = pow(ratio, -1.903) * 0.6151; //paulvha
       break;
-    case C3H8:
+    case C3H8: //propane
       ratio = getCurrentRatio(CH_NH3);
-      c = pow(ratio, -2.518) * 570.164;
+      c = pow(ratio, -2.492) * 569.56; //paulvha
       break;
-    case C4H10:
+    case C4H10: //iso-butane
       ratio = getCurrentRatio(CH_NH3);
-      c = pow(ratio, -2.138) * 398.107;
+      c = pow(ratio, -1.888) * 503.2; //paulvha
       break;
-    case CH4:
+    case CH4: //methane
       ratio = getCurrentRatio(CH_RED);
-      c = pow(ratio, -4.363) * 630.957;
+      c = pow(ratio, -4.093) * 837.38; //paulvha
       break;
-    case H2:
+    case H2: //hydrogen
       ratio = getCurrentRatio(CH_RED);
-      c = pow(ratio, -1.8) * 0.73;
+      c = pow(ratio, -1.781) * 0.828; //paulvha
       break;
-    case C2H5OH:
+    case C2H5OH: //ethanol
       ratio = getCurrentRatio(CH_RED);
-      c = pow(ratio, -1.552) * 1.622;
+      c = pow(ratio, -1.58) * 1.363; //paulvha
       break;
   }
 
